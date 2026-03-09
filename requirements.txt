@@ -1,0 +1,27 @@
+# ── Telegram ──────────────────────────────────────────────────────────────────
+python-telegram-bot[job-queue]==21.3
+
+# ── Image processing ──────────────────────────────────────────────────────────
+Pillow==10.4.0
+
+# ── PDF generation ────────────────────────────────────────────────────────────
+reportlab==4.2.2
+
+# ── PDF → images (requires poppler-utils system package) ─────────────────────
+pdf2image==1.17.0
+
+# ── Async database ────────────────────────────────────────────────────────────
+SQLAlchemy[asyncio]==2.0.31
+aiosqlite==0.20.0          # SQLite async driver
+asyncpg==0.29.0            # PostgreSQL async driver (optional)
+
+# ── Config / env ──────────────────────────────────────────────────────────────
+python-dotenv==1.0.1
+
+# ── HTTP (used internally by python-telegram-bot) ─────────────────────────────
+httpx==0.27.0
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest==8.3.2
+pytest-asyncio==0.23.8
+pytest-mock==3.14.0
