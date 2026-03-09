@@ -1,0 +1,65 @@
+version: "3.9"
+
+# ── Shared configuration ──────────────────────────────────────────────────────
+x-bot-common: &bot-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+    target: runtime
+  restart: unless-stopped
+  env_file:
+    - .env
+  volumes:
+    - temp_data:/app/temp
+    - log_data:/app/logs
+
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+
+  # ── Bot (SQLite, single-service default) ──────────────────────────────────
+  bot:
+    <<: *bot-common
+    container_name: file_converter_bot
+    profiles: ["sqlite", "default", ""]
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:////app/data/bot.db
+    volumes:
+      - temp_data:/app/temp
+      - log_data:/app/logs
+      - sqlite_data:/app/data
+
+  # ── Bot with PostgreSQL ────────────────────────────────────────────────────
+  bot_pg:
+    <<: *bot-common
+    container_name: file_converter_bot_pg
+    profiles: ["postgres"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://botuser:botpass@postgres:5432/botdb
+
+  # ── PostgreSQL (optional) ──────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: file_converter_pg
+    profiles: ["postgres"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: botuser
+      POSTGRES_PASSWORD: botpass
+      POSTGRES_DB: botdb
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U botuser -d botdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# ── Named volumes ─────────────────────────────────────────────────────────────
+volumes:
+  temp_data:
+  log_data:
+  sqlite_data:
+  pg_data:
